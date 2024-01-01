@@ -1,0 +1,31 @@
+name: Build
+
+on:
+  push:
+    branches:
+      - '*'
+
+jobs:
+  frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - uses: docker-practice/actions-setup-docker@master
+
+      - name: Build
+        run: |
+          cd frontend
+          docker build -t angler_frontend .
+
+  ingress:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - uses: docker-practice/actions-setup-docker@master
+
+      - name: Build
+        run: |
+          cd ingress
+          docker build -t angler_ingress .
