@@ -12,33 +12,41 @@ class Angler {
         });
     }
 
+    getInit() {
+        return {
+            ua: window.navigator.userAgent,
+            to: window.performance.timeOrigin,
+            st: this.getState()
+        }
+    }
+
+    getState(){
+        return {
+            loc: {
+                path: document.location.pathname,
+                hash: document.location.hash,
+                protocol: document.location.protocol
+            },
+            timing: {
+                now: window.performance.now()
+            },
+        }
+    }
+
     async register() {
-        // todo; split these into initial information & per page/event
+        var push = this.getInit()
 
-        // send over initial info
-        var ua = window.navigator.userAgent
-        console.log(ua)
-        var loc = document.location
-        // pathname, protocol, hash, 
-        console.log(loc)
-        // load times
+        console.log(push)
 
-        // meh
-        // window.screen
-        //var height = window.innerHeight
-        //var width = window.innerWidth
+        var response = await fetch(this.target + "/session", { //+ this.domain)
+            method: "POST",
+            body: JSON.stringify(push),
+            headers: {
+                "Content-Type": "application/json"
+            }
+        })
 
-        // timings
-        var start = window.performance.timeOrigin
-        console.log(start)
-        // defer this for time spent on pages
-
-        // load time
-        console.log(window.performance.now())
-
-        let response = await fetch(this.target + "/get/" + this.domain)
-        let data = await response.json()
-        return data
+        return response.json()
     }
 
     setSession(data) {
@@ -49,6 +57,6 @@ class Angler {
 
 var domain = document.currentScript.getAttribute("domain")
 // rewrite so target is fetched from script source
-var target = document.currentScript.getAttribute("target")  || "http://localhost:8084/ping" // || "https://angler.konst.fish/ingress"
+var target = document.currentScript.getAttribute("target")  || "http://localhost:8084/v1" // || "https://angler.konst.fish/ingress"
 
 const angler = new Angler(domain, target)
