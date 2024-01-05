@@ -6,41 +6,79 @@ class Angler {
         
         console.log(this.domain, '->', this.target)
 
-        this.register().then(data => {
-            console.log(data)
-            this.setSession(data)
-        });
+        window.addEventListener('locationchange', this.push)
+        window.addEventListener('hashchange', this.push)
+
+        this.push()
+    }
+
+    isMobile(){
+        return Number(Math.min(window.screen.width, window.screen.height) < 768 || navigator.userAgent.indexOf("Mobi") > -1)
     }
 
     getInit() {
         return {
             ua: window.navigator.userAgent,
             to: window.performance.timeOrigin,
-            st: this.getState()
+            rf: document.referrer,
+            dt: this.isMobile(),
         }
     }
 
-    getState(){
+    getState(event){
         return {
             loc: {
-                path: document.location.pathname,
-                hash: document.location.hash,
-                protocol: document.location.protocol
+                pt: document.location.pathname,
+                hs: document.location.hash,
+                pro: document.location.protocol
             },
-            timing: {
-                now: window.performance.now()
-            },
+            ev: event
         }
     }
 
-    async register() {
-        var push = this.getInit()
+    async push() {
+        if(!sessionStorage.getItem("angler_key")){
+            var data = await this.register()
+        }else{
+            var data = await this.update()
+        }
 
-        console.log(push)
+        console.log(data)
+    }
 
-        var response = await fetch(this.target + "/session", { //+ this.domain)
+    async register(){
+        var data = this.getInit()
+
+        console.log(data)
+
+        var response = await fetch(this.target + "/session/", { //+ this.domain)
             method: "POST",
-            body: JSON.stringify(push),
+            body: JSON.stringify(data),
+            headers: {
+                "Content-Type": "application/json"
+            }
+        })
+
+        if(response.ok){
+            var data = await response.json()
+            this.setSession(data.InsertedID)
+
+            this.update()
+        }
+
+        return data
+    }
+
+    async update(){
+        var data = this.getState()
+
+        // add to data; event type etc
+
+        console.log(data)
+
+        var response = await fetch(this.target + "/event/" + this.getSession(), { //+ this.domain + "/session/" + this.getSession() + 
+            method: "POST",
+            body: JSON.stringify(data),
             headers: {
                 "Content-Type": "application/json"
             }
@@ -49,8 +87,12 @@ class Angler {
         return response.json()
     }
 
-    setSession(data) {
-        sessionStorage.setItem("anglerKey", data.key);
+    getSession() {
+        return sessionStorage.getItem("angler_key");
+    }
+
+    setSession(key) {
+        sessionStorage.setItem("angler_key", key);
     }
 
 }

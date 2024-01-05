@@ -15,5 +15,6 @@ func CreateUrlMappings() {
 	v1 := Router.Group("/v1")
 	{
 		v1.POST("/session", controllers.PostSession)
+		v1.POST("/event/:sessionId", controllers.PostEvent)
 	}
 }

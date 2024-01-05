@@ -4,11 +4,18 @@ import (
 	"context"
 	"os"
 
+	"github.com/konstfish/angler/ingress/configs"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-var client *mongo.Client = ConnectMongo()
+var client *mongo.Client
+
+func init() {
+	configs.LoadDotEnv()
+
+	client = ConnectMongo()
+}
 
 func ConnectMongo() *mongo.Client {
 	uri := os.Getenv("MONGODB_URI")

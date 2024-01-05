@@ -22,26 +22,22 @@ type Session struct {
 
 */
 
-var sessionCollection *mongo.Collection
+var eventCollection *mongo.Collection
 
 func init() {
-	sessionCollection = db.GetCollection("angler", "sessions")
+	eventCollection = db.GetCollection("angler", "events")
 }
 
-func PostSession(c *gin.Context) {
+func PostEvent(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	log.Println(c.Request.Host)
-	log.Println(c.Request.RemoteAddr)
-	log.Println(c.Request.Body)
+	var event models.Event
+	c.BindJSON(&event)
 
-	var user models.Session
-	c.BindJSON(&user)
+	event.SessionId = c.Param("sessionId")
 
-	user.IP = c.ClientIP()
-
-	result, err := sessionCollection.InsertOne(ctx, user)
+	result, err := eventCollection.InsertOne(ctx, event)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
