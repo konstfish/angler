@@ -12,16 +12,6 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-/*
-type Session struct {
-	ID         primitive.ObjectID `bson:"_id,omitempty"`
-	UserAgent  string             `bson:"user_agent,omitempty"`
-	IP         string             `bson:"ip,omitempty"`
-	TimeOrigin float64            `bson:"time_origin,omitempty"`
-}
-
-*/
-
 var eventCollection *mongo.Collection
 
 func init() {
@@ -33,9 +23,14 @@ func PostEvent(c *gin.Context) {
 	defer cancel()
 
 	var event models.Event
-	c.BindJSON(&event)
+
+	if err := c.BindJSON(&event); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "malformed request"})
+		return
+	}
 
 	event.SessionId = c.Param("sessionId")
+	event.Time = float64(time.Now().UnixMilli())
 
 	result, err := eventCollection.InsertOne(ctx, event)
 	if err != nil {

@@ -38,14 +38,17 @@ func PostSession(c *gin.Context) {
 	log.Println(c.Request.RemoteAddr)
 	log.Println(c.Request.Body)
 
-	var user models.Session
-	c.BindJSON(&user)
+	var session models.Session
+	if err := c.BindJSON(&session); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "malformed request"})
+		return
+	}
 
-	user.IP = c.ClientIP()
+	session.IP = c.ClientIP()
 
-	redisClient.PushToQueue("geoip", user.IP)
+	redisClient.PushToQueue("geoip", session.IP)
 
-	result, err := sessionCollection.InsertOne(ctx, user)
+	result, err := sessionCollection.InsertOne(ctx, session)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
