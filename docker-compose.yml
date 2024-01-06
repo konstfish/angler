@@ -8,30 +8,10 @@ services:
       - mongodb_data:/data/db
 
   # redis
-
-  ingress:
-    depends_on:
-      - mongodb
-    build: ./ingress
+  redis:
+    image: redis/redis-stack:latest
     ports:
-      - 8084:8084
-    links:
-      - mongodb
-
-  frontend:
-    depends_on:
-      - mongodb
-    build: ./web
-    ports:
-      - 3000:3000
-    #links:
-    #  - backend
-
-  # backend
-
-  # auth
-
-  # mailer
+      - 6379:6379
 
 volumes:
   mongodb_data:
