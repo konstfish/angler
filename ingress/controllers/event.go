@@ -19,9 +19,6 @@ func init() {
 }
 
 func PostEvent(c *gin.Context) {
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-
 	var event models.Event
 
 	if err := c.BindJSON(&event); err != nil {
@@ -31,6 +28,9 @@ func PostEvent(c *gin.Context) {
 
 	event.SessionId = c.Param("sessionId")
 	event.Time = float64(time.Now().UnixMilli())
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
 
 	result, err := eventCollection.InsertOne(ctx, event)
 	if err != nil {

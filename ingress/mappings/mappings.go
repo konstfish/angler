@@ -14,7 +14,7 @@ func CreateUrlMappings() {
 
 	v1 := Router.Group("/v1")
 	{
-		v1.POST("/session", controllers.PostSession)
-		v1.POST("/event/:sessionId", controllers.PostEvent)
+		v1.POST("/session/:domain", controllers.DomainReferrer(), controllers.PostSession)
+		v1.POST("/event/:domain/session/:sessionId", controllers.DomainReferrer(), controllers.PostEvent)
 	}
 }

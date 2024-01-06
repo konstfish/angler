@@ -38,12 +38,12 @@ class Angler {
 
     async push() {
         if(!sessionStorage.getItem("angler_key")){
-            var data = await this.register()
+            var res = await this.register()
         }else{
-            var data = await this.update()
+            var res = await this.update()
         }
 
-        console.log(data)
+        console.log(res)
     }
 
     async register(){
@@ -51,7 +51,7 @@ class Angler {
 
         console.log(data)
 
-        var response = await fetch(this.target + "/session/", { //+ this.domain)
+        var response = await fetch(this.target + "/session/" + this.domain, {
             method: "POST",
             body: JSON.stringify(data),
             headers: {
@@ -60,13 +60,13 @@ class Angler {
         })
 
         if(response.ok){
-            var data = await response.json()
-            this.setSession(data.InsertedID)
+            var res_body = await response.json()
+            this.setSession(res_body.InsertedID)
 
             this.update("init")
-        }
 
-        return data
+            return res_body
+        }
     }
 
     async update(event){
@@ -76,7 +76,7 @@ class Angler {
 
         console.log(data)
 
-        var response = await fetch(this.target + "/event/" + this.getSession(), { //+ this.domain + "/session/" + this.getSession() + 
+        var response = await fetch(this.target + "/event/" + this.domain + "/session/" + this.getSession(), {
             method: "POST",
             body: JSON.stringify(data),
             headers: {
