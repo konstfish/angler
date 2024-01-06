@@ -6,8 +6,8 @@ class Angler {
         
         console.log(this.domain, '->', this.target)
 
-        window.addEventListener('locationchange', this.push)
-        window.addEventListener('hashchange', this.push)
+        window.addEventListener('locationchange', () => this.update('location'), false);
+        window.addEventListener('hashchange', () => this.update('hash'), false);
 
         this.push()
     }
@@ -63,14 +63,14 @@ class Angler {
             var data = await response.json()
             this.setSession(data.InsertedID)
 
-            this.update()
+            this.update("init")
         }
 
         return data
     }
 
-    async update(){
-        var data = this.getState()
+    async update(event){
+        var data = this.getState(event)
 
         // add to data; event type etc
 
@@ -101,4 +101,4 @@ var domain = document.currentScript.getAttribute("domain")
 // rewrite so target is fetched from script source
 var target = document.currentScript.getAttribute("target")  || "http://localhost:8084/v1" // || "https://angler.konst.fish/ingress"
 
-const angler = new Angler(domain, target)
+window.angler = new Angler(domain, target)

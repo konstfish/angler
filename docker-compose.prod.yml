@@ -7,7 +7,6 @@ services:
     volumes:
       - mongodb_data:/data/db
 
-  # redis
   redis:
     image: redis/redis-stack:latest
     ports:
@@ -16,18 +15,32 @@ services:
   ingress:
     depends_on:
       - mongodb
+      - redis
     build: ./ingress
     ports:
       - 8084:8084
     links:
       - mongodb
+    environment:
+      - MONGODB_URI=mongodb://mongodb:27017/angler
+      - REDIS_URI=redis://redis:6379/0
 
-  frontend:
+  geoip-api:
     depends_on:
       - mongodb
-    build: ./web
-    ports:
-      - 3000:3000
+      - redis
+    build: ./geoip-api
+    links:
+      - mongodb
+      - redis
+    environment:
+      - MONGODB_URI=mongodb://mongodb:27017/angler
+      - REDIS_URI=redis://redis:6379/0
+
+  #frontend:
+  #  build: ./web
+  #  ports:
+  #    - 3000:3000
     #links:
     #  - backend
 

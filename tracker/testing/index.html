@@ -8,8 +8,15 @@
     <link rel="stylesheet" href="https://components.konst.fish/main.css">
 
     <script defer domain="localhost" src="../angler.js"></script>
+    <script src="helpers.js"></script>
 </head>
 <body>
-    hello
+    <h1>Tracker Testing Page</h1>
+
+    <div class="helper-buttons flex">
+        <button onclick="clearSession()">Clear Cache</button>
+        <button onclick="sendEvent('button')">Send Event</button>
+        <button onclick="randomizeHash()">Random Hash</button>
+    </div>
 </body>
 </html>
