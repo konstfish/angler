@@ -8,24 +8,18 @@ on:
 jobs:
   frontend:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        component: [frontend, ingress, geoip-api]
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
       - uses: docker-practice/actions-setup-docker@master
 
       - name: Build
         run: |
-          cd frontend
-          docker build -t angler_frontend .
-
-  ingress:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - uses: docker-practice/actions-setup-docker@master
-
-      - name: Build
-        run: |
-          cd ingress
-          docker build -t angler_ingress .
+          cd ${{ matrix.component }}
+          docker build -t angler_${{ matrix.component }} .
+          
