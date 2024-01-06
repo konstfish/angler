@@ -12,7 +12,7 @@ func LoadDotEnv() {
 		log.Println("No .env file found")
 	}
 
-	requiredEnvVars := []string{"MONGODB_URI"}
+	requiredEnvVars := []string{"MONGODB_URI", "REDIS_URI"}
 
 	for _, envVar := range requiredEnvVars {
 		if os.Getenv(envVar) == "" {

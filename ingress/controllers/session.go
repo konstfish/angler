@@ -23,9 +23,11 @@ type Session struct {
 */
 
 var sessionCollection *mongo.Collection
+var redisClient *db.RedisClient
 
 func init() {
 	sessionCollection = db.GetCollection("angler", "sessions")
+	redisClient = db.NewRedisClient()
 }
 
 func PostSession(c *gin.Context) {
@@ -40,6 +42,8 @@ func PostSession(c *gin.Context) {
 	c.BindJSON(&user)
 
 	user.IP = c.ClientIP()
+
+	redisClient.PushToQueue("geoip", user.IP)
 
 	result, err := sessionCollection.InsertOne(ctx, user)
 	if err != nil {
