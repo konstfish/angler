@@ -11,6 +11,8 @@ RUN CGO_ENABLED=0 GOOS=linux go build -v -o main main/main.go
 
 FROM alpine:latest
 
+ENV GIN_MODE=release
+
 RUN apk --no-cache add ca-certificates
 
 WORKDIR /
