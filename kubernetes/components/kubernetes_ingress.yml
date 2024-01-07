@@ -1,0 +1,25 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: angler-ingress
+  namespace: angler
+spec:
+  ingressClassName: cloudflare-tunnel
+  rules:
+  - host: angler.konst.fish
+    http:
+      paths:
+      - path: /ingress
+        pathType: Prefix
+        backend:
+          service:
+            name: angler-ingress
+            port:
+              number: 8084
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: frontend
+            port:
+              number: 3000

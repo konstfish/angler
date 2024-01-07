@@ -1,0 +1,11 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - components/namespace.yml
+  - components/mongo.yml
+  - components/redis.yml
+  - components/frontend.yml
+  - components/ingress.yml
+  - components/geoip.yml
+  - components/kubernetes_ingress.yml

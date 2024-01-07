@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend-deployment
+  namespace: angler
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      imagePullSecrets:
+        - name: ghcr-token
+      containers:
+        - name: frontend
+          image: ghcr.io/konstfish/angler_frontend
+          resources:
+            requests:
+              cpu: "20m"
+              memory: "128Mi"
+            limits:
+              cpu: "50m"
+              memory: "256Mi"
+          #livenessProbe:
+          #  httpGet:
+          #    path: /nginx_status
+          #    port: 3000
+          #  initialDelaySeconds: 5
+          #  periodSeconds: 30
+          #  timeoutSeconds: 15
+          #  failureThreshold: 3
+          ports:
+            - containerPort: 3000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend
+  namespace: angler
+spec:
+  selector:
+    app: frontend
+  ports:
+    - protocol: TCP
+      port: 3000
+      targetPort: 3000
+  sessionAffinity: ClientIP
+

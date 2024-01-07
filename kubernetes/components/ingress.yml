@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ingress-depoyment
+  namespace: angler
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: angler-ingress
+  template:
+    metadata:
+      labels:
+        app: angler-ingress
+    spec:
+      imagePullSecrets:
+      - name: ghcr-token
+      initContainers:
+        - name: init-wait-for-db
+          image: alpine
+          command: ["/bin/sh", "-c", "for i in $(seq 1 300); do nc -zvw1 mongodb 27017 && exit 0 || sleep 3; done; exit 1"]
+      containers:
+        - name: angler-ingress
+          image: ghcr.io/konstfish/angler_ingress
+          resources:
+            requests:
+              cpu: "350m"
+              memory: "256Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+          env:
+            - name: MONGODB_URI
+              value: "mongodb://mongodb:27017/angler"
+            - name: REDIS_URI
+              value: "redis://redis:6379/0"
+          ports:
+            - containerPort: 8084
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: angler-ingress
+  namespace: angler
+spec:
+  selector:
+    app: angler-ingress
+  ports:
+    - protocol: TCP
+      name: ingress
+      port: 8084
+      targetPort: 8084

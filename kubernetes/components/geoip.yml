@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: geoip-api-deployment
+  namespace: angler
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: geoip-api
+  template:
+    metadata:
+      labels:
+        app: geoip-api
+    spec:
+      imagePullSecrets:
+      - name: ghcr-token
+      initContainers:
+        - name: init-wait-for-db
+          image: alpine
+          command: ["/bin/sh", "-c", "for i in $(seq 1 300); do nc -zvw1 mongodb 27017 && exit 0 || sleep 3; done; exit 1"]
+      containers:
+        - name: geoip-api
+          image: ghcr.io/konstfish/angler_geoip-api
+          resources:
+            requests:
+              cpu: "350m"
+              memory: "256Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+          env:
+            - name: MONGODB_URI
+              value: "mongodb://mongodb:27017/angler"
+            - name: REDIS_URI
+              value: "redis://redis:6379/0"
