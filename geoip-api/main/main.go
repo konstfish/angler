@@ -6,13 +6,8 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/konstfish/angler/geoip-api/configs"
 	"github.com/konstfish/angler/geoip-api/db"
 )
-
-func init() {
-	configs.LoadDotEnv()
-}
 
 func main() {
 	redisClient := db.NewRedisClient()

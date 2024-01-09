@@ -2,7 +2,6 @@ package db
 
 import (
 	"context"
-	"os"
 
 	"github.com/konstfish/angler/ingress/configs"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -18,7 +17,7 @@ func init() {
 }
 
 func ConnectMongo() *mongo.Client {
-	uri := os.Getenv("MONGODB_URI")
+	uri := configs.GetEnv("MONGODB_URI")
 
 	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(uri))
 	if err != nil {

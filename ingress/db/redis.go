@@ -3,8 +3,8 @@ package db
 import (
 	"context"
 	"log"
-	"os"
 
+	"github.com/konstfish/angler/ingress/configs"
 	"github.com/redis/go-redis/v9"
 )
 
@@ -14,7 +14,7 @@ type RedisClient struct {
 }
 
 func NewRedisClient() *RedisClient {
-	opt, err := redis.ParseURL(os.Getenv("REDIS_URI"))
+	opt, err := redis.ParseURL(configs.GetEnv("REDIS_URI"))
 	if err != nil {
 		panic(err)
 	}

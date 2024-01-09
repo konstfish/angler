@@ -30,7 +30,6 @@ class Angler {
             loc: {
                 pt: document.location.pathname,
                 hs: document.location.hash,
-                pro: document.location.protocol
             },
             ev: event
         }

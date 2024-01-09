@@ -39,6 +39,7 @@ func PostSession(c *gin.Context) {
 	}
 
 	session.IP = c.ClientIP()
+	session.Domain = c.Param("domain")
 
 	redisClient.PushToQueue("geoip", session.IP)
 
