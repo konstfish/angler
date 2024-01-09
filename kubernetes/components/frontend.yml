@@ -17,14 +17,8 @@ spec:
         - name: ghcr-token
       containers:
         - name: frontend
-          image: ghcr.io/konstfish/angler_frontend
-          resources:
-            requests:
-              cpu: "20m"
-              memory: "128Mi"
-            limits:
-              cpu: "50m"
-              memory: "256Mi"
+          image: ghcr.io/konstfish/angler_frontend:latest
+          imagePullPolicy: Always
           #livenessProbe:
           #  httpGet:
           #    path: /nginx_status

@@ -18,19 +18,13 @@ spec:
       initContainers:
         - name: init-wait-for-db
           image: alpine
-          command: ["/bin/sh", "-c", "for i in $(seq 1 300); do nc -zvw1 mongodb 27017 && exit 0 || sleep 3; done; exit 1"]
+          command: ["/bin/sh", "-c", "for i in $(seq 1 300); do nc -zvw1 angler-mongo-svc.mongodb.svc.cluster.local 27017 && exit 0 || sleep 3; done; exit 1"]
       containers:
         - name: geoip-api
-          image: ghcr.io/konstfish/angler_geoip-api
-          resources:
-            requests:
-              cpu: "350m"
-              memory: "256Mi"
-            limits:
-              cpu: "500m"
-              memory: "512Mi"
+          image: ghcr.io/konstfish/angler_geoip-api:latest
+          imagePullPolicy: Always
           env:
             - name: MONGODB_URI
-              value: "mongodb://mongodb:27017/angler"
+              value: "mongodb+srv://angler-user:asdf1234asdfsmile@angler-mongo-svc.mongodb.svc.cluster.local/admin?replicaSet=angler-mongo&ssl=false"
             - name: REDIS_URI
               value: "redis://redis:6379/0"

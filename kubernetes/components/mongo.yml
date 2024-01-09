@@ -1,32 +1,34 @@
-apiVersion: apps/v1
-kind: Deployment
+apiVersion: mongodbcommunity.mongodb.com/v1
+kind: MongoDBCommunity
 metadata:
-  name: mongodb
-  namespace: angler
+  name: angler-mongo
+  namespace: mongodb
 spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: mongodb
-  template:
-    metadata:
-      labels:
-        app: mongodb
-    spec:
-      containers:
-      - name: mongodb
-        image: mongo
-        ports:
-        - containerPort: 27017
----
+  members: 3
+  type: ReplicaSet
+  version: "6.0.5"
+  security:
+    authentication:
+      modes: ["SCRAM"]
+  users:
+    - name: angler-user
+      db: admin
+      passwordSecretRef:
+        name: angler-mongo-user-password
+      roles:
+        - name: clusterAdmin
+          db: admin
+        - name: userAdminAnyDatabase
+          db: admin
+        - name: readWriteAnyDatabase
+          db: admin
+      scramCredentialsSecretName: angler-mongo-scram
+--- 
 apiVersion: v1
-kind: Service
+kind: Secret
 metadata:
-  name: mongodb
-  namespace: angler
-spec:
-  ports:
-  - port: 27017
-    targetPort: 27017
-  selector:
-    app: mongodb
+  name: angler-mongo-user-password
+  namespace: mongodb
+type: Opaque
+stringData:
+  password: asdf1234asdfsmile
