@@ -30,7 +30,7 @@ func DomainReferrer() gin.HandlerFunc {
 		referrer, err := url.Parse(referrerHeader)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid referrer URL"})
-			c.Abort()
+			c.AbortWithStatus(403)
 			return
 		}
 
@@ -38,7 +38,7 @@ func DomainReferrer() gin.HandlerFunc {
 
 		if referrer.Host != target {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Referrer does not match domain"})
-			c.Abort()
+			c.AbortWithStatus(403)
 			return
 		}
 

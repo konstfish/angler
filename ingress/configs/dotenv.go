@@ -2,29 +2,45 @@ package configs
 
 import (
 	"log"
-	"os"
+	"strings"
 
 	"github.com/joho/godotenv"
+	"github.com/spf13/viper"
 )
 
 func init() {
-	LoadDotEnv()
+	LoadConfig()
 }
 
-func LoadDotEnv() {
+func LoadConfig() {
 	if err := godotenv.Load(); err != nil {
 		log.Println("No .env file found")
 	}
 
-	requiredEnvVars := []string{"MONGODB_URI", "REDIS_URI"}
+	viper.SetConfigName("config")
+	viper.SetConfigType("yaml")
+	viper.AddConfigPath(".")
 
-	for _, envVar := range requiredEnvVars {
-		if os.Getenv(envVar) == "" {
-			log.Fatalf("Environment variable %s must not be empty. See\n\t https://github.com/konstfish/angler/README.md", envVar)
+	viper.AutomaticEnv()
+	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
+
+	if err := viper.ReadInConfig(); err != nil {
+		log.Printf("Error reading config file, %s", err)
+	}
+
+	expectedVars := []string{
+		"MONGODB_URI",
+		"REDIS_URI",
+	}
+
+	for _, v := range expectedVars {
+		log.Println(v, viper.GetString(v))
+		if viper.GetString(v) == "" {
+			log.Fatalf("Environment variable %s must not be empty. See\n\t https://github.com/konstfish/angler/README.md", v)
 		}
 	}
 }
 
-func GetEnv(variable string) string {
-	return os.Getenv(variable)
+func GetConfigVar(variable string) string {
+	return viper.GetString(variable)
 }

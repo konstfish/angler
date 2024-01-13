@@ -14,7 +14,7 @@ type RedisClient struct {
 }
 
 func NewRedisClient() *RedisClient {
-	opt, err := redis.ParseURL(configs.GetEnv("REDIS_URI"))
+	opt, err := redis.ParseURL(configs.GetConfigVar("REDIS_URI"))
 	if err != nil {
 		panic(err)
 	}

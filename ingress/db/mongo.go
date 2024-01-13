@@ -11,13 +11,11 @@ import (
 var client *mongo.Client
 
 func init() {
-	configs.LoadDotEnv()
-
 	client = ConnectMongo()
 }
 
 func ConnectMongo() *mongo.Client {
-	uri := configs.GetEnv("MONGODB_URI")
+	uri := configs.GetConfigVar("MONGODB_URI")
 
 	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(uri))
 	if err != nil {
