@@ -10,13 +10,13 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        component: [frontend, ingress, geoip-api]
+        component: [ingress, geoip-api, frontend, auth, backend]
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          fetch-depth: 3
+          fetch-depth: 0
 
       - name: Check for changes
         id: check-changes

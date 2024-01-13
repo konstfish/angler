@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        component: [ingress, geoip-api, frontend]
+        component: [ingress, geoip-api, frontend, auth, backend]
 
     steps:
       - name: Checkout
