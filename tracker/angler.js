@@ -69,9 +69,10 @@ class Angler {
     }
 
     async update(event){
-        var data = this.getState(event)
-
         // add to data; event type etc
+
+        var event = this.getNavigationType()
+        var data = this.getState(event)
 
         console.log(data)
 
@@ -94,10 +95,19 @@ class Angler {
         sessionStorage.setItem("angler_key", key);
     }
 
+    getNavigationType() {
+        let performanceEntries = performance.getEntriesByType("navigation");
+        
+        if (performanceEntries && performanceEntries.length > 0) {
+            return performanceEntries[0].type;
+        }
+    
+        return 'unknown';
+    }
 }
 
 var domain = document.currentScript.getAttribute("domain")
 // rewrite so target is fetched from script source
-var target = document.currentScript.getAttribute("target")  || "http://localhost:8084/v1" // || "https://angler.konst.fish/ingress"
+var target = document.currentScript.getAttribute("target")  || "http://localhost:8084/ingress/v1" // || "https://angler.konst.fish/ingress"
 
 window.angler = new Angler(domain, target)
