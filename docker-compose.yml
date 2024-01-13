@@ -36,6 +36,30 @@ services:
     environment:
       - MONGODB_URI=mongodb://mongodb:27017/angler
       - REDIS_URI=redis://redis:6379/0
+    
+  auth:
+    depends_on:
+      - mongodb
+      - redis
+    build: ./auth
+    links:
+      - mongodb
+      - redis
+    environment:
+      - MONGODB_URI=mongodb://mongodb:27017/angler
+      - REDIS_URI=redis://redis:6379/0
+  
+  backend:
+    depends_on:
+      - mongodb
+      - redis
+    build: ./backend
+    links:
+      - mongodb
+      - redis
+    environment:
+      - MONGODB_URI=mongodb://mongodb:27017/angler
+      - REDIS_URI=redis://redis:6379/0
 
   #frontend:
   #  build: ./web
@@ -43,10 +67,6 @@ services:
   #    - 3000:3000
     #links:
     #  - backend
-
-  # backend
-
-  # auth
 
   # mailer
 

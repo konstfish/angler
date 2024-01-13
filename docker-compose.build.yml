@@ -12,3 +12,10 @@ services:
     build: ./geoip-api
     image: ghcr.io/konstfish/angler_geoip-api:latest
 
+  backend:
+    build: ./backend
+    image: ghcr.io/konstfish/angler_backend:latest
+  
+  auth:
+    build: ./auth
+    image: ghcr.io/konstfish/angler_auth:latest

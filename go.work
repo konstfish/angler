@@ -1,7 +1,8 @@
 go 1.21.1
 
 use (
-	./geoip-api
-	./ingress
+	./auth
 	./backend
+	./ingress
+	./geoip-api
 )
