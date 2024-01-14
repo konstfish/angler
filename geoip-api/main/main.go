@@ -2,15 +2,12 @@ package main
 
 import (
 	"log"
-	"os"
-	"os/signal"
-	"syscall"
 
-	"github.com/konstfish/angler/geoip-api/db"
+	"github.com/konstfish/angler/geoip-api/controllers"
 )
 
 func main() {
-	redisClient := db.NewRedisClient()
+	/*redisClient := db.NewRedisClient()
 	defer redisClient.Client.Close()
 
 	go redisClient.ListenForNewItems("geoip")
@@ -21,5 +18,6 @@ func main() {
 	sig := <-sigChan
 	log.Println("Received signal:", sig)
 
-	log.Println("Shutting down")
+	log.Println("Shutting down")*/
+	log.Println(controllers.GetIpInfo("1.1.1.1"))
 }
