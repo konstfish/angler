@@ -7,11 +7,10 @@ services:
     volumes:
       - mongodb_data:/data/db
 
-  # redis
-  redis:
-    image: redis/redis-stack:latest
+  rabbitmq:
+    image: rabbitmq:3
     ports:
-      - 6379:6379
+      - 5672:5672
 
 volumes:
   mongodb_data:

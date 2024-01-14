@@ -2,15 +2,21 @@ package main
 
 import (
 	"log"
+	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/konstfish/angler/geoip-api/controllers"
+	"github.com/konstfish/angler/geoip-api/db"
 )
 
 func main() {
-	/*redisClient := db.NewRedisClient()
-	defer redisClient.Client.Close()
+	client, err := db.NewRabbitMQClient()
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	go redisClient.ListenForNewItems("geoip")
+	go client.Listen("geoip", controllers.PushIpInfo)
 
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
@@ -18,6 +24,5 @@ func main() {
 	sig := <-sigChan
 	log.Println("Received signal:", sig)
 
-	log.Println("Shutting down")*/
-	log.Println(controllers.GetIpInfo("1.1.1.1"))
+	log.Println("Shutting down")
 }

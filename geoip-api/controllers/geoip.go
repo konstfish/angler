@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"context"
 	"errors"
 	"log"
 	"net"
@@ -8,7 +9,16 @@ import (
 
 	"github.com/konstfish/angler/geoip-api/db"
 	"github.com/konstfish/angler/geoip-api/models"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
+
+var geoIpCollection *mongo.Collection
+
+func init() {
+	geoIpCollection = db.GetCollection("angler", "geoip")
+}
 
 func isValidAddress(ip string) bool {
 	return net.ParseIP(ip) != nil
@@ -45,8 +55,8 @@ func GetIpInfo(address string) (models.GeoIP, error) {
 	return geoip, err
 }
 
-/*func processAddress(address string) {
-	geoip, err := controllers.GetIpInfo(address)
+func PushIpInfo(address string) {
+	geoip, err := GetIpInfo(address)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -60,11 +70,3 @@ func GetIpInfo(address string) (models.GeoIP, error) {
 
 	log.Println("Added IP:", geoip.Address, result)
 }
-
-
-var geoIpCollection *mongo.Collection
-
-func init() {
-	geoIpCollection = GetCollection("angler", "geoip")
-}
-*/
