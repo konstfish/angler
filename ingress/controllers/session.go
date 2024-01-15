@@ -29,6 +29,8 @@ type Session struct {
 var sessionCollection *mongo.Collection
 var redisClient *db.RedisClient
 
+var sessionTTL time.Duration = time.Second * 60 * 3
+
 func init() {
 	sessionCollection = db.GetCollection("angler", "sessions")
 	redisClient = db.ConnectRedis()
@@ -90,6 +92,7 @@ func getSession(sessionId string) (models.Session, error) {
 		return session, err
 	}
 
+	go writeCacheSession(session)
 	return session, nil
 }
 
@@ -103,7 +106,7 @@ func existsSession(sessionId string) bool {
 }
 
 func writeCacheSession(session models.Session) {
-	redisClient.Client.Set(context.Background(), session.ID.Hex(), session.SerializeSession(), time.Second*60*3)
+	redisClient.Client.Set(context.Background(), session.ID.Hex(), session.SerializeSession(), sessionTTL)
 }
 
 func getCacheSession(sessionId string) (models.Session, error) {
@@ -114,6 +117,8 @@ func getCacheSession(sessionId string) (models.Session, error) {
 
 		return session, err
 	}
+
+	_, err = redisClient.Client.Expire(context.Background(), sessionId, sessionTTL).Result()
 
 	var session models.Session
 	json.Unmarshal([]byte(sessionJSON), &session)
