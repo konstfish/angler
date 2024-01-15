@@ -2,6 +2,8 @@ package controllers
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"time"
@@ -9,6 +11,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/konstfish/angler/ingress/db"
 	"github.com/konstfish/angler/ingress/models"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -27,7 +31,7 @@ var redisClient *db.RedisClient
 
 func init() {
 	sessionCollection = db.GetCollection("angler", "sessions")
-	redisClient = db.NewRedisClient()
+	redisClient = db.ConnectRedis()
 }
 
 func PostSession(c *gin.Context) {
@@ -38,21 +42,81 @@ func PostSession(c *gin.Context) {
 		return
 	}
 
+	session.ID = primitive.NewObjectID()
 	session.IP = c.ClientIP()
 	session.Domain = c.Param("domain")
 
-	redisClient.PushToQueue("geoip", session.IP)
+	// c.JSON(200, session.ID)
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
+	go writeCacheSession(session)
+	go redisClient.PushToQueue("geoip", session.IP)
 
-	result, err := sessionCollection.InsertOne(ctx, session)
+	result, err := writeSession(session)
+	fmt.Println(err)
+	fmt.Println(result)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	log.Println(result.InsertedID)
+	c.JSON(200, gin.H{"id": session.ID})
+}
 
-	c.JSON(200, result)
+func writeSession(session models.Session) (string, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	result, err := sessionCollection.InsertOne(ctx, session)
+	if err != nil {
+		return "", err
+	}
+
+	return result.InsertedID.(primitive.ObjectID).Hex(), nil
+}
+
+func getSession(sessionId string) (models.Session, error) {
+	var session models.Session
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	objectId, err := primitive.ObjectIDFromHex(sessionId)
+	if err != nil {
+		return session, err
+	}
+
+	err = sessionCollection.FindOne(ctx, bson.M{"_id": objectId}).Decode(&session)
+	if err != nil {
+		return session, err
+	}
+
+	return session, nil
+}
+
+func existsSession(sessionId string) bool {
+	_, err := getCacheSession(sessionId)
+	if err != nil {
+		return false
+	}
+
+	return true
+}
+
+func writeCacheSession(session models.Session) {
+	redisClient.Client.Set(context.Background(), session.ID.Hex(), session.SerializeSession(), time.Second*60*3)
+}
+
+func getCacheSession(sessionId string) (models.Session, error) {
+	sessionJSON, err := redisClient.Client.Get(context.Background(), sessionId).Result()
+	if err != nil {
+		log.Println("cache miss")
+		session, err := getSession(sessionId)
+
+		return session, err
+	}
+
+	var session models.Session
+	json.Unmarshal([]byte(sessionJSON), &session)
+
+	return session, nil
 }

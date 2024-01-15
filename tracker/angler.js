@@ -39,7 +39,7 @@ class Angler {
         if(!sessionStorage.getItem("angler_key")){
             var res = await this.register()
         }else{
-            var res = await this.update()
+            var res = await this.update("unknown")
         }
 
         console.log(res)
@@ -60,7 +60,8 @@ class Angler {
 
         if(response.ok){
             var res_body = await response.json()
-            this.setSession(res_body.InsertedID)
+            console.log(res_body)
+            this.setSession(res_body.id)
 
             this.update("init")
 
@@ -70,8 +71,10 @@ class Angler {
 
     async update(event){
         // add to data; event type etc
-
-        var event = this.getNavigationType()
+        if(event == "location" || event == "hash" || event == "unknown"){
+            var event = this.getNavigationType()
+        }
+        
         var data = this.getState(event)
 
         console.log(data)

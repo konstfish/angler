@@ -26,6 +26,11 @@ func PostEvent(c *gin.Context) {
 		return
 	}
 
+	if !existsSession(c.Param("sessionId")) {
+		c.JSON(http.StatusNotFound, gin.H{"error": "invalid session"})
+		return
+	}
+
 	event.SessionId = c.Param("sessionId")
 	event.Time = float64(time.Now().UnixMilli())
 
