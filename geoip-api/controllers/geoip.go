@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"context"
 	"errors"
 	"log"
 	"net"
@@ -8,7 +9,16 @@ import (
 
 	"github.com/konstfish/angler/geoip-api/db"
 	"github.com/konstfish/angler/geoip-api/models"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
+
+var geoIpCollection *mongo.Collection
+
+func init() {
+	geoIpCollection = db.GetCollection("angler", "geoip")
+}
 
 func isValidAddress(ip string) bool {
 	return net.ParseIP(ip) != nil
@@ -45,8 +55,16 @@ func GetIpInfo(address string) (models.GeoIP, error) {
 	return geoip, err
 }
 
-/*func processAddress(address string) {
-	geoip, err := controllers.GetIpInfo(address)
+func ProcessAddress(address string) {
+	exists, err := CheckAddress(address)
+	if err != nil {
+		log.Fatal(err)
+	}
+	if exists {
+		return
+	}
+
+	geoip, err := GetIpInfo(address)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -61,10 +79,22 @@ func GetIpInfo(address string) (models.GeoIP, error) {
 	log.Println("Added IP:", geoip.Address, result)
 }
 
+// TODO implement cache check
+// returns false if the address doesn't exist or the last check was more than 2 weeks ago
+func CheckAddress(address string) (bool, error) {
+	var result models.GeoIP
+	err := geoIpCollection.FindOne(context.TODO(), bson.M{"_id": address}).Decode(&result)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return false, nil
+		}
+		return false, err
+	}
 
-var geoIpCollection *mongo.Collection
+	twoWeeksAgo := time.Now().Add(-14 * 24 * time.Hour)
+	if result.AddressAge.Before(twoWeeksAgo) {
+		return false, nil
+	}
 
-func init() {
-	geoIpCollection = GetCollection("angler", "geoip")
+	return true, nil
 }
-*/

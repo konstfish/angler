@@ -30,7 +30,7 @@ func LoadConfig() {
 
 	expectedVars := []string{
 		"MONGODB_URI",
-		"RABBITMQ_URI",
+		"REDIS_URI",
 	}
 
 	for _, v := range expectedVars {
