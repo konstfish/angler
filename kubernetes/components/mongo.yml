@@ -7,6 +7,10 @@ spec:
   members: 3
   type: ReplicaSet
   version: "6.0.5"
+  prometheus:
+    username: prometheus-username
+    passwordSecretRef:
+      name: metrics-endpoint-password
   security:
     authentication:
       modes: ["SCRAM"]
@@ -32,3 +36,40 @@ metadata:
 type: Opaque
 stringData:
   password: asdf1234asdfsmile
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: metrics-endpoint-password
+  namespace: mongodb
+type: Opaque
+stringData:
+  password: 'Not-So-Secure!'
+  username: prometheus-username
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:  
+  labels:
+    app: angler-mongo-svc
+    release: prometheus-stack
+  name: angler-mongo-sm
+  namespace: mongodb
+spec:
+  endpoints:
+  - basicAuth:
+      password:
+        key: password
+        name: metrics-endpoint-password
+      username:
+        key: username
+        name: metrics-endpoint-password
+
+    port: prometheus
+    scheme: http
+  namespaceSelector:
+    matchNames:
+    - mongodb
+  selector:
+    matchLabels:
+      app: angler-mongo-svc
