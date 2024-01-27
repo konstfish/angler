@@ -4,7 +4,7 @@ metadata:
   name: ingress-depoyment
   namespace: angler
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: angler-ingress
@@ -28,6 +28,8 @@ spec:
               value: "mongodb+srv://angler-user:asdf1234asdfsmile@angler-mongo-svc.mongodb.svc.cluster.local/admin?replicaSet=angler-mongo&ssl=false"
             - name: REDIS_URI
               value: "redis://redis:6379/0"
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: "tempo.monitoring.svc.cluster.local:4318"
           ports:
             - containerPort: 8084
 ---

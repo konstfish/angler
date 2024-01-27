@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"context"
 	"log"
 	"net/http"
 	"time"
@@ -19,6 +18,8 @@ func init() {
 }
 
 func PostEvent(c *gin.Context) {
+	ctx := c.Request.Context()
+
 	var event models.Event
 
 	if err := c.BindJSON(&event); err != nil {
@@ -26,16 +27,13 @@ func PostEvent(c *gin.Context) {
 		return
 	}
 
-	if !existsSession(c.Param("sessionId")) {
+	if !existsSession(ctx, c.Param("sessionId")) {
 		c.JSON(http.StatusNotFound, gin.H{"error": "invalid session"})
 		return
 	}
 
 	event.SessionId = c.Param("sessionId")
 	event.Time = float64(time.Now().UnixMilli())
-
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
 
 	result, err := eventCollection.InsertOne(ctx, event)
 	if err != nil {
