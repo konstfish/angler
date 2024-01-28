@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/konstfish/angler/ingress/configs"
+	"github.com/redis/go-redis/extra/redisotel/v9"
 	"github.com/redis/go-redis/v9"
 	"golang.org/x/time/rate"
 )
@@ -22,6 +23,10 @@ func ConnectRedis() *RedisClient {
 	}
 
 	rdb := redis.NewClient(opt)
+
+	if err := redisotel.InstrumentTracing(rdb); err != nil {
+		log.Println(err)
+	}
 
 	return &RedisClient{
 		Client: rdb,
@@ -49,7 +54,11 @@ func (r *RedisClient) ListenForNewItems(queueName string, handler func(msg strin
 	}
 }
 
-func (r *RedisClient) PushToQueue(queueName string, value string) {
+func (r *RedisClient) PushToQueue(ctx context.Context, queueName string, value string) {
 	log.Printf("Pushing %s to queue %s", value, queueName)
-	r.Client.RPush(r.Ctx, queueName, value)
+	r.Client.RPush(ctx, queueName, value)
+}
+
+func (r *RedisClient) PushToQueueWithDefaultContext(queueName string, value string) {
+	r.PushToQueue(r.Ctx, queueName, value)
 }

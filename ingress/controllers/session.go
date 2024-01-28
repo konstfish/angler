@@ -50,10 +50,13 @@ func PostSession(c *gin.Context) {
 
 	// c.JSON(200, session.ID)
 
-	go writeCacheSession(session)
-	go redisClient.PushToQueue("geoip", session.IP)
-
 	ctx := c.Request.Context()
+
+	// cache aside session details
+	go writeCacheSession(ctx, session)
+
+	// send ip to geoip queue
+	go redisClient.PushToQueue(ctx, "geoip", session.IP)
 
 	result, err := writeSession(ctx, session)
 	fmt.Println(err)
@@ -88,7 +91,7 @@ func getSession(ctx context.Context, sessionId string) (models.Session, error) {
 		return session, err
 	}
 
-	go writeCacheSession(session)
+	go writeCacheSession(ctx, session)
 	return session, nil
 }
 
@@ -101,12 +104,12 @@ func existsSession(ctx context.Context, sessionId string) bool {
 	return true
 }
 
-func writeCacheSession(session models.Session) {
-	redisClient.Client.Set(context.Background(), session.ID.Hex(), session.SerializeSession(), sessionTTL)
+func writeCacheSession(ctx context.Context, session models.Session) {
+	redisClient.Client.Set(ctx, session.ID.Hex(), session.SerializeSession(), sessionTTL)
 }
 
 func getCacheSession(ctx context.Context, sessionId string) (models.Session, error) {
-	sessionJSON, err := redisClient.Client.Get(context.Background(), sessionId).Result()
+	sessionJSON, err := redisClient.Client.Get(ctx, sessionId).Result()
 	if err != nil {
 		log.Println("cache miss")
 		session, err := getSession(ctx, sessionId)
