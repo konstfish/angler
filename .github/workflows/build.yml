@@ -33,5 +33,6 @@ jobs:
       - name: Build
         if: steps.check-changes.outputs.changed == 'true'
         run: |
-          cd ${{ matrix.component }}
+          # cd ${{ matrix.component }}
+          # docker build -t angler_${{ matrix.component }} . -f ${{ matrix.component }}/Dockerfile
           docker build -t angler_${{ matrix.component }} .

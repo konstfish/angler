@@ -1,9 +1,17 @@
 package main
 
 import (
+	"github.com/konstfish/angler/shared/monitoring"
+
 	"github.com/konstfish/angler/ingress/mappings"
-	"github.com/konstfish/angler/ingress/monitoring"
 )
+
+func init() {
+	/*configs.LoadConfig([]string{
+		"MONGODB_URI",
+		"REDIS_URI",
+	})*/
+}
 
 func main() {
 	monitoring.InitTracer("angler-ingress")

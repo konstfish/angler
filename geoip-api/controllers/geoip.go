@@ -7,8 +7,9 @@ import (
 	"net"
 	"time"
 
-	"github.com/konstfish/angler/geoip-api/db"
+	geodb "github.com/konstfish/angler/geoip-api/db"
 	"github.com/konstfish/angler/geoip-api/models"
+	"github.com/konstfish/angler/shared/db"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -29,7 +30,7 @@ func GetIpInfo(address string) (models.GeoIP, error) {
 		return models.GeoIP{}, errors.New("Invalid IP address")
 	}
 
-	record, err := db.GetAddressData(address)
+	record, err := geodb.GetAddressData(address)
 	if err != nil {
 		log.Fatal(err)
 	}

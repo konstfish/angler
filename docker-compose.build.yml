@@ -5,11 +5,15 @@ services:
     image: ghcr.io/konstfish/angler_frontend:latest
 
   ingress:
-    build: ./ingress
+    build:
+      context: .
+      dockerfile: ingress/Dockerfile
     image: ghcr.io/konstfish/angler_ingress:latest
 
   geoip-api:
-    build: ./geoip-api
+    build:
+      context: .
+      dockerfile: geoip-api/Dockerfile
     image: ghcr.io/konstfish/angler_geoip-api:latest
 
   backend:

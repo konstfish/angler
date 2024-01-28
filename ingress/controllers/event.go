@@ -6,8 +6,8 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/konstfish/angler/ingress/db"
 	"github.com/konstfish/angler/ingress/models"
+	"github.com/konstfish/angler/shared/db"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 

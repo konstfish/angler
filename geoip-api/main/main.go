@@ -7,10 +7,13 @@ import (
 	"syscall"
 
 	"github.com/konstfish/angler/geoip-api/controllers"
-	"github.com/konstfish/angler/geoip-api/db"
+	"github.com/konstfish/angler/shared/db"
+	"github.com/konstfish/angler/shared/monitoring"
 )
 
 func main() {
+	monitoring.InitTracer("angler-geoip-api")
+
 	redisClient := db.ConnectRedis()
 	defer redisClient.Client.Close()
 

@@ -5,7 +5,8 @@ import (
 	"log"
 	"time"
 
-	"github.com/konstfish/angler/geoip-api/configs"
+	"github.com/konstfish/angler/shared/configs"
+	"github.com/redis/go-redis/extra/redisotel/v9"
 	"github.com/redis/go-redis/v9"
 	"golang.org/x/time/rate"
 )
@@ -22,6 +23,10 @@ func ConnectRedis() *RedisClient {
 	}
 
 	rdb := redis.NewClient(opt)
+
+	if err := redisotel.InstrumentTracing(rdb); err != nil {
+		log.Println(err)
+	}
 
 	return &RedisClient{
 		Client: rdb,
@@ -49,7 +54,11 @@ func (r *RedisClient) ListenForNewItems(queueName string, handler func(msg strin
 	}
 }
 
-func (r *RedisClient) PushToQueue(queueName string, value string) {
-	log.Println("Pushing to queue", queueName)
-	r.Client.RPush(r.Ctx, queueName, value)
+func (r *RedisClient) PushToQueue(ctx context.Context, queueName string, value string) {
+	log.Printf("Pushing %s to queue %s", value, queueName)
+	r.Client.RPush(ctx, queueName, value)
+}
+
+func (r *RedisClient) PushToQueueWithDefaultContext(queueName string, value string) {
+	r.PushToQueue(r.Ctx, queueName, value)
 }

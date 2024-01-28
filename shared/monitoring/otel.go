@@ -4,7 +4,7 @@ import (
 	"context"
 	"log"
 
-	"github.com/konstfish/angler/ingress/configs"
+	"github.com/konstfish/angler/shared/configs"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp"
 	"go.opentelemetry.io/otel/sdk/resource"
@@ -36,4 +36,6 @@ func InitTracer(service string) {
 	)
 
 	otel.SetTracerProvider(tp)
+
+	log.Println("Tracing initialized")
 }

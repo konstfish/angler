@@ -2,12 +2,20 @@ FROM golang:1.21-alpine as builder
 
 WORKDIR /app
 
-COPY go.mod go.sum ./
+COPY geoip-api/go.mod geoip-api/go.sum ./
 RUN go mod download
 
-COPY . .
+COPY go.work .
+COPY geoip-api geoip-api
 
-RUN CGO_ENABLED=0 GOOS=linux go build -v -o main main/main.go
+COPY shared shared
+
+COPY geoip-api geoip-api
+COPY ingress ingress
+COPY auth auth
+COPY backend backend
+
+RUN CGO_ENABLED=0 GOOS=linux go build -v -o main geoip-api/main/main.go
 
 FROM alpine:latest
 
@@ -18,6 +26,6 @@ WORKDIR /
 RUN mkdir -p db
 
 COPY --from=builder /app/main .
-COPY container-init.sh .
+COPY geoip-api/container-init.sh .
 
 CMD ["./container-init.sh"]

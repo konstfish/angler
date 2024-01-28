@@ -9,13 +9,14 @@ import (
 )
 
 func init() {
-	LoadConfig()
+	LoadConfig([]string{
+		"MONGODB_URI",
+		"REDIS_URI",
+	})
 }
 
-func LoadConfig() {
-	if err := godotenv.Load(); err != nil {
-		log.Println("No .env file found")
-	}
+func LoadConfig(expectedVars []string) {
+	godotenv.Load()
 
 	viper.SetConfigName("config")
 	viper.SetConfigType("yaml")
@@ -26,11 +27,6 @@ func LoadConfig() {
 
 	if err := viper.ReadInConfig(); err != nil {
 		log.Printf("Error reading config file, %s", err)
-	}
-
-	expectedVars := []string{
-		"MONGODB_URI",
-		"REDIS_URI",
 	}
 
 	for _, v := range expectedVars {
