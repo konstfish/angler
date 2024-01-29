@@ -10,6 +10,7 @@ import (
 	geodb "github.com/konstfish/angler/geoip-api/db"
 	"github.com/konstfish/angler/geoip-api/models"
 	"github.com/konstfish/angler/shared/db"
+	"github.com/konstfish/angler/shared/monitoring"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -25,7 +26,10 @@ func isValidAddress(ip string) bool {
 	return net.ParseIP(ip) != nil
 }
 
-func GetIpInfo(address string) (models.GeoIP, error) {
+func GetIpInfo(ctx context.Context, address string) (models.GeoIP, error) {
+	ctx, span := monitoring.Tracer.Start(ctx, "GetIpInfo")
+	defer span.End()
+
 	if !isValidAddress(address) {
 		return models.GeoIP{}, errors.New("Invalid IP address")
 	}
@@ -56,8 +60,8 @@ func GetIpInfo(address string) (models.GeoIP, error) {
 	return geoip, err
 }
 
-func ProcessAddress(address string) {
-	exists, err := CheckAddress(address)
+func ProcessAddress(ctx context.Context, address string) {
+	exists, err := CheckAddress(ctx, address)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -65,14 +69,14 @@ func ProcessAddress(address string) {
 		return
 	}
 
-	geoip, err := GetIpInfo(address)
+	geoip, err := GetIpInfo(ctx, address)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	filter := bson.M{"_id": geoip.Address}
 	opts := options.Replace().SetUpsert(true)
-	result, err := geoIpCollection.ReplaceOne(context.TODO(), filter, geoip, opts)
+	result, err := geoIpCollection.ReplaceOne(ctx, filter, geoip, opts)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -82,9 +86,9 @@ func ProcessAddress(address string) {
 
 // TODO implement cache check
 // returns false if the address doesn't exist or the last check was more than 2 weeks ago
-func CheckAddress(address string) (bool, error) {
+func CheckAddress(ctx context.Context, address string) (bool, error) {
 	var result models.GeoIP
-	err := geoIpCollection.FindOne(context.TODO(), bson.M{"_id": address}).Decode(&result)
+	err := geoIpCollection.FindOne(ctx, bson.M{"_id": address}).Decode(&result)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
 			return false, nil

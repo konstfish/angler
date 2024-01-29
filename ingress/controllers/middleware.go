@@ -45,3 +45,16 @@ func DomainReferrer() gin.HandlerFunc {
 		c.Next()
 	}
 }
+
+func FilterTraces(req *http.Request) bool {
+	/*var notToLogEndpoints = []string{"/health", "/metrics"}
+
+	return slices.Index(notToLogEndpoints, req.URL.Path) == -1*/
+
+	// check if request method is options
+	if req.Method == "OPTIONS" {
+		return false
+	}
+
+	return true
+}

@@ -105,7 +105,7 @@ func existsSession(ctx context.Context, sessionId string) bool {
 }
 
 func writeCacheSession(ctx context.Context, session models.Session) {
-	redisClient.Client.Set(ctx, session.ID.Hex(), session.SerializeSession(), sessionTTL)
+	redisClient.Client.Set(ctx, session.ID.Hex(), session.Serialize(), sessionTTL)
 }
 
 func getCacheSession(ctx context.Context, sessionId string) (models.Session, error) {

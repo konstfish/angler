@@ -10,9 +10,9 @@ var Router *gin.Engine
 
 func CreateUrlMappings() {
 	Router = gin.Default()
+	Router.Use(otelgin.Middleware("angler-ingress", otelgin.WithFilter(controllers.FilterTraces)))
 
 	Router.Use(controllers.Cors())
-	Router.Use(otelgin.Middleware("angler-ingress"))
 
 	v1 := Router.Group("/ingress/v1")
 	{

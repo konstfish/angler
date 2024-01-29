@@ -12,3 +12,9 @@ push:
 	docker push ghcr.io/konstfish/angler_frontend:latest
 	docker push ghcr.io/konstfish/angler_auth:latest
 	docker push ghcr.io/konstfish/angler_backend:latest
+
+deploy:
+	kubectl delete deployments.apps geoip-api-deployment
+	kubectl delete deployments.apps ingress-deployment
+	kubectl apply -f kubernetes/components/geoip.yml
+	kubectl apply -f kubernetes/components/ingress.yml

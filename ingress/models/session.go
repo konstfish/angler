@@ -16,7 +16,7 @@ type Session struct {
 	Domain     string             `bson:"domain" json:"dm"`
 }
 
-func (session *Session) SerializeSession() string {
+func (session *Session) Serialize() string {
 	sessionJSON, err := json.Marshal(session)
 	if err != nil {
 		return ""
