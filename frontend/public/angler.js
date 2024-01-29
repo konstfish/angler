@@ -30,7 +30,6 @@ class Angler {
             loc: {
                 pt: document.location.pathname,
                 hs: document.location.hash,
-                pro: document.location.protocol
             },
             ev: event
         }
@@ -40,7 +39,7 @@ class Angler {
         if(!sessionStorage.getItem("angler_key")){
             var res = await this.register()
         }else{
-            var res = await this.update()
+            var res = await this.update("unknown")
         }
 
         console.log(res)
@@ -61,7 +60,8 @@ class Angler {
 
         if(response.ok){
             var res_body = await response.json()
-            this.setSession(res_body.InsertedID)
+            console.log(res_body)
+            this.setSession(res_body.id)
 
             this.update("init")
 
@@ -70,9 +70,12 @@ class Angler {
     }
 
     async update(event){
-        var data = this.getState(event)
-
         // add to data; event type etc
+        if(event == "location" || event == "hash" || event == "unknown"){
+            var event = this.getNavigationType()
+        }
+        
+        var data = this.getState(event)
 
         console.log(data)
 
@@ -95,10 +98,19 @@ class Angler {
         sessionStorage.setItem("angler_key", key);
     }
 
+    getNavigationType() {
+        let performanceEntries = performance.getEntriesByType("navigation");
+        
+        if (performanceEntries && performanceEntries.length > 0) {
+            return performanceEntries[0].type;
+        }
+    
+        return 'unknown';
+    }
 }
 
 var domain = document.currentScript.getAttribute("domain")
 // rewrite so target is fetched from script source
-var target = document.currentScript.getAttribute("target")  || "http://localhost:8084/v1" // || "https://angler.konst.fish/ingress"
+var target = document.currentScript.getAttribute("target")  || "https://angler.konst.fish/ingress/v1"
 
 window.angler = new Angler(domain, target)

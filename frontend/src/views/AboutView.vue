@@ -1,6 +1,10 @@
 <template>
-  <div class="about">
-    <h1>This is an about page</h1>
+  <h1>Tracker Testing Page</h1>
+
+  <div class="helper-buttons flex">
+    <button onclick="clearSession()">Clear Cache</button>
+    <button onclick="sendEvent('button')">Send Event</button>
+    <button onclick="randomizeHash()">Random Hash</button>
   </div>
 </template>
 

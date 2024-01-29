@@ -16,5 +16,7 @@ push:
 deploy:
 	kubectl delete deployments.apps geoip-api-deployment
 	kubectl delete deployments.apps ingress-deployment
+	kubectl delete deployments.apps frontend-deployment
 	kubectl apply -f kubernetes/components/geoip.yml
 	kubectl apply -f kubernetes/components/ingress.yml
+	kubectl apply -f kubernetes/components/frontend.yml
