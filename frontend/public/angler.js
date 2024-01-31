@@ -6,9 +6,16 @@ class Angler {
         
         console.log(this.domain, '->', this.target)
 
-        window.addEventListener('locationchange', () => this.update('location'), false);
+        window.addEventListener('locationchange', () => this.update('location'));
         window.addEventListener('hashchange', () => this.update('hash'), false);
 
+        // to make spa navigation events work
+        var c
+        window.history.pushState && (c = window.history.pushState, window.history.pushState = function() {
+            c.apply(this, arguments),
+            window.angler.update('location')
+        });
+        
         this.push()
     }
 
@@ -71,6 +78,10 @@ class Angler {
 
     async update(event){
         // add to data; event type etc
+        if(!this.getSession()){
+            return {}
+        }
+
         if(event == "location" || event == "hash" || event == "unknown"){
             var event = this.getNavigationType()
         }
@@ -110,7 +121,6 @@ class Angler {
 }
 
 var domain = document.currentScript.getAttribute("domain")
-// rewrite so target is fetched from script source
 var target = document.currentScript.getAttribute("target")  || "https://angler.konst.fish/ingress/v1"
 
 window.angler = new Angler(domain, target)
