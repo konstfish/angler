@@ -7,6 +7,7 @@ RUN go mod download
 
 COPY go.work .
 COPY ingress ingress
+
 COPY shared shared
 
 COPY geoip-api geoip-api

@@ -43,5 +43,5 @@ func PostEvent(c *gin.Context) {
 
 	log.Println(result.InsertedID)
 
-	c.JSON(200, result)
+	c.JSON(http.StatusNoContent, nil)
 }

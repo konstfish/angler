@@ -10,6 +10,7 @@ import (
 	"github.com/konstfish/angler/shared/monitoring"
 	"github.com/redis/go-redis/extra/redisotel/v9"
 	"github.com/redis/go-redis/v9"
+	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/trace"
 	"golang.org/x/time/rate"
 )
@@ -20,8 +21,8 @@ type RedisClient struct {
 }
 
 type RedisQueueItem struct {
-	Data    string `json:"data"`
-	TraceID string `json:"traceId"`
+	Data        string `json:"data"`
+	TraceParent string `json:"traceparent"`
 }
 
 func (item *RedisQueueItem) Serialize() (error, string) {
@@ -67,8 +68,10 @@ func (r *RedisClient) ListenForNewItems(queueName string, handler func(ctx conte
 
 	for {
 		if limiter.Allow() {
-			ctx := context.Background()
+			var ctx context.Context
 			var span trace.Span
+
+			ctx = context.Background()
 
 			// pop item from queue
 			result, err := r.Client.BLPop(ctx, 0, queueName).Result()
@@ -86,17 +89,20 @@ func (r *RedisClient) ListenForNewItems(queueName string, handler func(ctx conte
 			log.Println(queueItem)
 
 			// create span
-			traceID, err := trace.TraceIDFromHex(queueItem.TraceID)
+			sc, err := monitoring.ParseTraceparentHeader(queueItem.TraceParent)
 			if err != nil {
 				log.Println("Invalid TraceID:", err)
 			} else {
-				spanContext := trace.NewSpanContext(trace.SpanContextConfig{
-					TraceID: traceID,
-					Remote:  true,
-				})
-
-				ctx, span = monitoring.Tracer.Start(trace.ContextWithRemoteSpanContext(ctx, spanContext), "processQueueItem")
-				// span.SetAttributes(attribute.String("queue", queueName))
+				ctx, span = monitoring.Tracer.Start(
+					trace.ContextWithRemoteSpanContext(ctx, sc),
+					(queueName + " receive"),
+					trace.WithSpanKind(trace.SpanKindConsumer),
+					trace.WithAttributes(
+						attribute.String("messaging.system", "redis"),
+						attribute.String("messaging.operation", "receive"),
+						attribute.String("messaging.destination.name", queueName),
+					),
+				)
 			}
 
 			handler(ctx, queueItem.Data)
@@ -115,12 +121,24 @@ func (r *RedisClient) PushToQueue(ctx context.Context, queueName string, value s
 
 	log.Println(ctx)
 
-	traceID := trace.SpanFromContext(ctx).SpanContext().TraceID().String()
+	traceparent := monitoring.ExtractTraceparentHeader(ctx)
+
+	ctx, span := monitoring.Tracer.Start(
+		ctx,
+		(queueName + " publish"),
+		trace.WithSpanKind(trace.SpanKindProducer),
+		trace.WithAttributes(
+			attribute.String("messaging.system", "redis"),
+			attribute.String("messaging.operation", "publish"),
+			attribute.String("messaging.destination.name", queueName),
+		),
+	)
+	defer span.End()
 
 	// create queue item
 	queueItem := RedisQueueItem{
-		Data:    value,
-		TraceID: traceID,
+		Data:        value,
+		TraceParent: traceparent,
 	}
 
 	// serialize queue item

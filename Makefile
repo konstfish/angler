@@ -14,8 +14,8 @@ push:
 	docker push ghcr.io/konstfish/angler_backend:latest
 
 deploy:
-	kubectl rollout restart deployment/ingress-deployment
-	kubectl rollout restart deployment/frontend-deployment
-	kubectl rollout restart deployment/geoip-api-deployment
+	kubectl -n angler rollout restart deployment/ingress-deployment
+	kubectl -n angler rollout restart deployment/frontend-deployment
+	kubectl -n angler rollout restart deployment/geoip-api-deployment
 
 redeploy: push deploy
