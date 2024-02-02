@@ -16,7 +16,7 @@ services:
     depends_on:
       - mongodb
       - redis
-    build: ./ingress
+    image: ghcr.io/konstfish/angler_ingress:latest
     ports:
       - 8084:8084
     links:
@@ -29,7 +29,7 @@ services:
     depends_on:
       - mongodb
       - redis
-    build: ./geoip-api
+    image: ghcr.io/konstfish/angler_geoip-api:latest
     links:
       - mongodb
       - redis
@@ -61,12 +61,14 @@ services:
       - MONGODB_URI=mongodb://mongodb:27017/angler
       - REDIS_URI=redis://redis:6379/0
 
-  #frontend:
-  #  build: ./web
-  #  ports:
-  #    - 3000:3000
-    #links:
-    #  - backend
+  frontend:
+    image: ghcr.io/konstfish/angler_frontend:latest
+    ports:
+      - 3000:3000
+    links:
+      - backend
+
+  # todo router for docker-compose
 
   # mailer
 

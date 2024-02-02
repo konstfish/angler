@@ -119,10 +119,6 @@ func (r *RedisClient) ListenForNewItems(queueName string, handler func(ctx conte
 func (r *RedisClient) PushToQueue(ctx context.Context, queueName string, value string) {
 	log.Printf("Pushing %s to queue %s", value, queueName)
 
-	log.Println(ctx)
-
-	traceparent := monitoring.ExtractTraceparentHeader(ctx)
-
 	ctx, span := monitoring.Tracer.Start(
 		ctx,
 		(queueName + " publish"),
@@ -134,6 +130,8 @@ func (r *RedisClient) PushToQueue(ctx context.Context, queueName string, value s
 		),
 	)
 	defer span.End()
+
+	traceparent := monitoring.ExtractTraceparentHeader(ctx)
 
 	// create queue item
 	queueItem := RedisQueueItem{
