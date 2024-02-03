@@ -12,7 +12,6 @@ COPY shared shared
 
 COPY geoip-api geoip-api
 COPY auth auth
-COPY backend backend
 
 RUN CGO_ENABLED=0 GOOS=linux go build -v -o main ingress/main/main.go
 

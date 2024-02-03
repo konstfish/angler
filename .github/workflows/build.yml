@@ -28,10 +28,10 @@ jobs:
           fi
 
       - uses: docker-practice/actions-setup-docker@master
-        if: steps.check-changes.outputs.changed == 'true'
+        if: ${{ steps.check-changes.outputs.changed == 'true' }}
 
       - name: Build
-        if: steps.check-changes.outputs.changed == 'true'
+        if: ${{ steps.check-changes.outputs.changed == 'true' }}
         run: |
           # cd ${{ matrix.component }}
           # docker build -t angler_${{ matrix.component }} . -f ${{ matrix.component }}/Dockerfile
