@@ -22,9 +22,9 @@ jobs:
         id: check-changes
         run: |
           if git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -q ${{ matrix.component }}; then
-            echo "{changed}={true}" >> $GITHUB_OUTPUT
+            echo "changed=true" >> $GITHUB_OUTPUT
           else
-            echo "{changed}={false}" >> $GITHUB_OUTPUT
+            echo "changed=false" >> $GITHUB_OUTPUT
           fi
 
       - uses: docker-practice/actions-setup-docker@master
@@ -33,6 +33,6 @@ jobs:
       - name: Build
         if: ${{ steps.check-changes.outputs.changed == 'true' }}
         run: |
-          # cd ${{ matrix.component }}
+          cd ${{ matrix.component }}
           # docker build -t angler_${{ matrix.component }} . -f ${{ matrix.component }}/Dockerfile
           docker build -t angler_${{ matrix.component }} .

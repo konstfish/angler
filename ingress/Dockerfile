@@ -2,16 +2,10 @@ FROM golang:1.21-alpine as builder
 
 WORKDIR /app
 
-COPY ingress/go.mod ingress/go.sum ./
+COPY go.mod go.sum ./
 RUN go mod download
 
-COPY go.work .
-COPY ingress ingress
-
-COPY shared shared
-
-COPY geoip-api geoip-api
-COPY auth auth
+COPY . .
 
 RUN CGO_ENABLED=0 GOOS=linux go build -v -o main ingress/main/main.go
 
