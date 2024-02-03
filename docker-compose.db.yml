@@ -7,7 +7,6 @@ services:
     volumes:
       - mongodb_data:/data/db
 
-  # redis
   redis:
     image: redis/redis-stack:latest
     ports:

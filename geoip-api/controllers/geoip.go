@@ -14,6 +14,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+	"go.opentelemetry.io/otel/trace"
 )
 
 var geoIpCollection *mongo.Collection
@@ -27,8 +28,12 @@ func isValidAddress(ip string) bool {
 }
 
 func GetIpInfo(ctx context.Context, address string) (models.GeoIP, error) {
-	ctx, span := monitoring.Tracer.Start(ctx, "GetIpInfo")
-	defer span.End()
+	// todo there 100% is better handling for this
+	if monitoring.Tracer != nil {
+		var span trace.Span
+		ctx, span = monitoring.Tracer.Start(ctx, "GetIpInfo")
+		defer span.End()
+	}
 
 	if !isValidAddress(address) {
 		return models.GeoIP{}, errors.New("Invalid IP address")

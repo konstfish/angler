@@ -7,13 +7,13 @@ services:
   ingress:
     build:
       context: .
-      dockerfile: ingress/Dockerfile
+      dockerfile: ingress/Dockerfile.local
     image: ghcr.io/konstfish/angler_ingress:latest
 
   geoip-api:
     build:
       context: .
-      dockerfile: geoip-api/Dockerfile
+      dockerfile: geoip-api/Dockerfile.local
     image: ghcr.io/konstfish/angler_geoip-api:latest
 
   backend:

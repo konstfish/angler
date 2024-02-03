@@ -59,6 +59,10 @@ func ExtractTraceparentHeader(ctx context.Context) string {
 	return fmt.Sprintf("00-%s-%s-%s", sc.TraceID(), sc.SpanID(), sc.TraceFlags())
 }
 
+func EmptyTraceparentHeader() string {
+	return "00-00000000000000000000000000000000-0000000000000000-00"
+}
+
 func ParseTraceparentHeader(traceparentHeader string) (trace.SpanContext, error) {
 	parts := strings.Split(traceparentHeader, "-")
 	if len(parts) != 4 {

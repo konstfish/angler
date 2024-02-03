@@ -90,9 +90,7 @@ func (r *RedisClient) ListenForNewItems(queueName string, handler func(ctx conte
 
 			// create span
 			sc, err := monitoring.ParseTraceparentHeader(queueItem.TraceParent)
-			if err != nil {
-				log.Println("Invalid TraceID:", err)
-			} else {
+			if err == nil {
 				ctx, span = monitoring.Tracer.Start(
 					trace.ContextWithRemoteSpanContext(ctx, sc),
 					(queueName + " receive"),
@@ -106,6 +104,7 @@ func (r *RedisClient) ListenForNewItems(queueName string, handler func(ctx conte
 			}
 
 			handler(ctx, queueItem.Data)
+
 			if span != nil {
 				span.End()
 			}
@@ -119,19 +118,27 @@ func (r *RedisClient) ListenForNewItems(queueName string, handler func(ctx conte
 func (r *RedisClient) PushToQueue(ctx context.Context, queueName string, value string) {
 	log.Printf("Pushing %s to queue %s", value, queueName)
 
-	ctx, span := monitoring.Tracer.Start(
-		ctx,
-		(queueName + " publish"),
-		trace.WithSpanKind(trace.SpanKindProducer),
-		trace.WithAttributes(
-			attribute.String("messaging.system", "redis"),
-			attribute.String("messaging.operation", "publish"),
-			attribute.String("messaging.destination.name", queueName),
-		),
-	)
-	defer span.End()
+	var traceparent = monitoring.EmptyTraceparentHeader()
 
-	traceparent := monitoring.ExtractTraceparentHeader(ctx)
+	log.Println(monitoring.Tracer)
+
+	if monitoring.Tracer != nil {
+		var span trace.Span
+
+		ctx, span = monitoring.Tracer.Start(
+			ctx,
+			(queueName + " publish"),
+			trace.WithSpanKind(trace.SpanKindProducer),
+			trace.WithAttributes(
+				attribute.String("messaging.system", "redis"),
+				attribute.String("messaging.operation", "publish"),
+				attribute.String("messaging.destination.name", queueName),
+			),
+		)
+		defer span.End()
+
+		traceparent = monitoring.ExtractTraceparentHeader(ctx)
+	}
 
 	// create queue item
 	queueItem := RedisQueueItem{
