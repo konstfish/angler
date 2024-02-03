@@ -26,6 +26,6 @@ WORKDIR /
 RUN mkdir -p db
 
 COPY --from=builder /app/main .
-COPY geoip-api/container-init.sh .
+COPY container-init.sh .
 
 CMD ["./container-init.sh"]
