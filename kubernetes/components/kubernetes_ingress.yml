@@ -9,7 +9,7 @@ spec:
   - host: angler.konst.fish
     http:
       paths:
-      - path: /ingress
+      - path: /api/ingress
         pathType: Prefix
         backend:
           service:

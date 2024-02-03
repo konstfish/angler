@@ -111,6 +111,6 @@ class Angler {
 
 var domain = document.currentScript.getAttribute("domain")
 // rewrite so target is fetched from script source
-var target = document.currentScript.getAttribute("target")  || "http://localhost:8084/ingress/v1" // || "https://angler.konst.fish/ingress"
+var target = document.currentScript.getAttribute("target") || "http://localhost:8084/api/ingress/v1" // || "https://angler.konst.fish/ingress"
 
 window.angler = new Angler(domain, target)

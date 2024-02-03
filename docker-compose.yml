@@ -63,12 +63,16 @@ services:
 
   frontend:
     image: ghcr.io/konstfish/angler_frontend:latest
+
+  router:
+    build: ./router
     ports:
       - 3000:3000
     links:
+      - frontend
+      - auth
       - backend
-
-  # todo router for docker-compose
+      - ingress
 
   # mailer
 
