@@ -5,8 +5,10 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/konstfish/angler/shared/configs"
+	"github.com/konstfish/angler/shared/monitoring"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/propagation"
+	"go.opentelemetry.io/otel/trace"
 )
 
 func Cors() gin.HandlerFunc {
@@ -25,6 +27,10 @@ func Cors() gin.HandlerFunc {
 
 func ValidateJWT() gin.HandlerFunc {
 	return func(c *gin.Context) {
+		// create new span for this middleware
+		ctx, span := monitoring.Tracer.Start(c.Request.Context(), "ValidateJWT", trace.WithSpanKind(trace.SpanKindClient))
+		defer span.End()
+
 		authHeader := c.GetHeader("Authorization")
 		if authHeader == "" {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Authorization header missing"})
@@ -39,7 +45,7 @@ func ValidateJWT() gin.HandlerFunc {
 
 		// Inject the token into the request
 		req.Header.Add("Authorization", authHeader)
-		otel.GetTextMapPropagator().Inject(c.Request.Context(), propagation.HeaderCarrier(req.Header))
+		otel.GetTextMapPropagator().Inject(ctx, propagation.HeaderCarrier(req.Header))
 
 		// Send the request to the auth service
 		client := &http.Client{}

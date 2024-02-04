@@ -21,9 +21,11 @@ services:
       - 8084:8084
     links:
       - mongodb
+      - redis
     environment:
       - MONGODB_URI=mongodb://mongodb:27017/angler
       - REDIS_URI=redis://redis:6379/0
+      - OTEL_EXPORTER_OTLP_ENDPOINT=jaeger:4318
 
   geoip-api:
     depends_on:
@@ -36,7 +38,8 @@ services:
     environment:
       - MONGODB_URI=mongodb://mongodb:27017/angler
       - REDIS_URI=redis://redis:6379/0
-    
+      - OTEL_EXPORTER_OTLP_ENDPOINT=jaeger:4318
+
   auth:
     depends_on:
       - mongodb
@@ -77,6 +80,11 @@ services:
       - auth
       - backend
       - ingress
+
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    ports:
+      - 16686:16686
 
   # mailer
 
