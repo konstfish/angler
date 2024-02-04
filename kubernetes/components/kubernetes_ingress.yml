@@ -23,6 +23,13 @@ spec:
             name: angler-backend
             port:
               number: 8085
+      - path: /api/auth
+        pathType: Prefix
+        backend:
+          service:
+            name: angler-auth
+            port:
+              number: 8086
       - path: /
         pathType: Prefix
         backend:

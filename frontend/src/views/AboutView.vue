@@ -5,6 +5,7 @@
     <button onclick="clearSession()">Clear Cache</button>
     <button onclick="sendEvent('button')">Send Event</button>
     <button onclick="randomizeHash()">Random Hash</button>
+    <button onclick="testAuth()">Test Auth</button>
   </div>
 </template>
 
