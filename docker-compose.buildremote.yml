@@ -1,0 +1,24 @@
+version: '3.7'
+services:
+  frontend:
+    build: ./frontend
+    image: ghcr.io/konstfish/angler_frontend:latest
+
+  ingress:
+    build: ./ingress
+    image: ghcr.io/konstfish/angler_ingress:latest
+
+  geoip-api:
+    build: ./geoip-api
+    image: ghcr.io/konstfish/angler_geoip-api:latest
+
+  backend:
+    build: ./backend
+    image: ghcr.io/konstfish/angler_backend:latest
+  
+  auth:
+    build: ./auth
+    image: ghcr.io/konstfish/angler_auth:latest
+
+  router:
+    build: ./helper/router
