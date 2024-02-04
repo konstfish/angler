@@ -4,7 +4,7 @@ go 1.21.1
 
 require (
 	github.com/gin-gonic/gin v1.9.1
-	github.com/konstfish/angler/shared v0.0.0-20240203150430-77ef7c16f385
+	github.com/konstfish/angler/shared v0.0.0-20240204192529-abd6da9943dd
 	go.mongodb.org/mongo-driver v1.13.1
 	go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin v0.47.0
 )
