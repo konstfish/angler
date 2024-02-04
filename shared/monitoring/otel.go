@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"net/http"
 	"strconv"
 	"strings"
 
@@ -17,6 +18,7 @@ import (
 )
 
 var Tracer trace.Tracer
+var ServiceName string
 
 func InitTracer(service string) {
 	if configs.GetConfigVar("OTEL_EXPORTER_OTLP_ENDPOINT") == "" {
@@ -43,6 +45,7 @@ func InitTracer(service string) {
 
 	otel.SetTracerProvider(tp)
 
+	ServiceName = service
 	Tracer = otel.Tracer(service)
 
 	log.Println("Tracing initialized")
@@ -92,4 +95,18 @@ func ParseTraceparentHeader(traceparentHeader string) (trace.SpanContext, error)
 		TraceFlags: trace.TraceFlags(traceFlags),
 		Remote:     true,
 	}), nil
+}
+
+// middleware
+func FilterTraces(req *http.Request) bool {
+	/*var notToLogEndpoints = []string{"/health", "/metrics"}
+
+	return slices.Index(notToLogEndpoints, req.URL.Path) == -1*/
+
+	// check if request method is options
+	if req.Method == "OPTIONS" {
+		return false
+	}
+
+	return true
 }

@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend-deployment
+  namespace: angler
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: angler-backend
+  template:
+    metadata:
+      labels:
+        app: angler-backend
+    spec:
+      imagePullSecrets:
+      - name: ghcr-token
+      initContainers:
+        - name: init-wait-for-db
+          image: alpine
+          command: ["/bin/sh", "-c", "for i in $(seq 1 300); do nc -zvw1 angler-mongo-svc.mongodb.svc.cluster.local 27017 && exit 0 || sleep 3; done; exit 1"]
+      containers:
+        - name: angler-backend
+          image: ghcr.io/konstfish/angler_backend:latest
+          imagePullPolicy: Always
+          env:
+            - name: MONGODB_URI
+              value: "mongodb+srv://angler-user:asdf1234asdfsmile@angler-mongo-svc.mongodb.svc.cluster.local/admin?replicaSet=angler-mongo&ssl=false"
+            - name: REDIS_URI
+              value: "redis://redis:6379/0"
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: "tempo.monitoring.svc.cluster.local:4318"
+          ports:
+            - containerPort: 8085
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: angler-backend
+  namespace: angler
+spec:
+  selector:
+    app: angler-backend
+  ports:
+    - protocol: TCP
+      name: backend
+      port: 8085
+      targetPort: 8085

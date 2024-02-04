@@ -1,10 +1,6 @@
 package controllers
 
 import (
-	"log"
-	"net/http"
-	"net/url"
-
 	"github.com/gin-gonic/gin"
 )
 
@@ -19,29 +15,5 @@ func Cors() gin.HandlerFunc {
 			c.AbortWithStatus(204)
 			return
 		}
-	}
-}
-
-func DomainReferrer() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		referrerHeader := c.Request.Header.Get("Referer")
-		target := c.Param("domain")
-
-		referrer, err := url.Parse(referrerHeader)
-		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid referrer URL"})
-			c.AbortWithStatus(403)
-			return
-		}
-
-		log.Println(referrer.Host, target)
-
-		if referrer.Host != target {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Referrer does not match domain"})
-			c.AbortWithStatus(403)
-			return
-		}
-
-		c.Next()
 	}
 }
