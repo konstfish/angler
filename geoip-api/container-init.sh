@@ -1,6 +1,8 @@
 #!/bin/sh
 set -e
 
+mkdir -p db
+
 REPO="P3TERX/GeoLite.mmdb"
 FILE="GeoLite2-City.mmdb"
 

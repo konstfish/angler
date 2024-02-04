@@ -7,22 +7,34 @@ services:
   ingress:
     build:
       context: .
-      dockerfile: ingress/Dockerfile.local
+      dockerfile: helper/docker/Dockerfile.gowork
+      args:
+        - COMPONENT=ingress
     image: ghcr.io/konstfish/angler_ingress:latest
 
   geoip-api:
     build:
       context: .
-      dockerfile: geoip-api/Dockerfile.local
+      dockerfile: helper/docker/Dockerfile.goworkinit
+      args:
+        - COMPONENT=geoip-api
     image: ghcr.io/konstfish/angler_geoip-api:latest
 
   backend:
-    build: ./backend
+    build:
+      context: .
+      dockerfile: helper/docker/Dockerfile.gowork
+      args:
+        - COMPONENT=backend
     image: ghcr.io/konstfish/angler_backend:latest
   
   auth:
-    build: ./auth
+    build:
+      context: .
+      dockerfile: helper/docker/Dockerfile.gowork
+      args:
+        - COMPONENT=auth
     image: ghcr.io/konstfish/angler_auth:latest
 
   router:
-    build: ./router
+    build: ./helper/router

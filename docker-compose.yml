@@ -65,7 +65,7 @@ services:
     image: ghcr.io/konstfish/angler_frontend:latest
 
   router:
-    build: ./router
+    build: ./helper/router
     ports:
       - 3000:3000
     links:
