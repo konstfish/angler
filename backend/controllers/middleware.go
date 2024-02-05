@@ -1,9 +1,12 @@
 package controllers
 
 import (
+	"encoding/json"
+	"io"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/konstfish/angler/backend/models"
 	"github.com/konstfish/angler/shared/configs"
 	"github.com/konstfish/angler/shared/monitoring"
 	"go.opentelemetry.io/otel"
@@ -29,7 +32,6 @@ func ValidateJWT() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// create new span for this middleware
 		ctx, span := monitoring.Tracer.Start(c.Request.Context(), "ValidateJWT", trace.WithSpanKind(trace.SpanKindClient))
-		defer span.End()
 
 		authHeader := c.GetHeader("Authorization")
 		if authHeader == "" {
@@ -54,7 +56,30 @@ func ValidateJWT() gin.HandlerFunc {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Invalid or expired token"})
 			return
 		}
+		defer resp.Body.Close()
+
+		body, err := io.ReadAll(resp.Body)
+		if err != nil {
+			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "Failed to read response"})
+			return
+		}
+
+		var user models.User
+		if err := json.Unmarshal(body, &user); err != nil {
+			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "Failed to parse response"})
+			return
+		}
+
+		// set user in context
+		c.Set("user", user)
+
+		span.End()
 
 		c.Next()
 	}
+}
+
+func GetUserFromContext(c *gin.Context) models.User {
+	user, _ := c.Get("user")
+	return user.(models.User)
 }

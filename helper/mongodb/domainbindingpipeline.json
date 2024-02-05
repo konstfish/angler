@@ -1,0 +1,51 @@
+[
+    {
+      $match:
+        /**
+         * query: The query in MQL.
+         */
+        {
+          user_id: ObjectId(
+            "65bfd52574b9d5285293b310"
+          )
+        }
+    },
+    {
+      $lookup:
+        /**
+         * from: The target collection.
+         * localField: The local join field.
+         * foreignField: The target join field.
+         * as: The name for the results.
+         * pipeline: Optional pipeline to run on the foreign collection.
+         * let: Optional variables to use in the pipeline field stages.
+         */
+        {
+          from: "domains",
+          localField: "domain_id",
+          foreignField: "_id",
+          as: "domain"
+        }
+    },
+    {
+      $project:
+        /**
+         * specifications: The fields to
+         *   include or exclude.
+         */
+        {
+          domain: {
+            $arrayElemAt: ["$domain", 0]
+          }
+        }
+    },
+    {
+      $replaceRoot:
+        /**
+         * replacementDocument: A document or string.
+         */
+        {
+          newRoot: "$domain"
+        }
+    }
+  ]

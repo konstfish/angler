@@ -160,5 +160,9 @@ func GetVerify(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"user": claims["user"]})
+	// return user id and email
+	c.JSON(http.StatusOK, gin.H{
+		"id":   userId,
+		"mail": claims["user"],
+	})
 }

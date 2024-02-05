@@ -18,5 +18,9 @@ func CreateUrlMappings() {
 	v1 := Router.Group("/api/backend/v1")
 	{
 		v1.POST("/alive", controllers.ValidateJWT(), controllers.GetTemp)
+
+		v1.POST("/domain", controllers.ValidateJWT(), controllers.PostDomain)
+		v1.GET("/domain/:domain", controllers.ValidateJWT(), controllers.GetDomain)
+		v1.GET("/domains", controllers.ValidateJWT(), controllers.GetDomains)
 	}
 }
