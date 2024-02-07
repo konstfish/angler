@@ -98,7 +98,7 @@ class Angler {
             }
         })
 
-        return response.json()
+        return response.status
     }
 
     getSession() {
