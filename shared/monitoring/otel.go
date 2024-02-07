@@ -22,6 +22,9 @@ var Tracer trace.Tracer
 var ServiceName string
 
 func InitTracer(service string) {
+	ServiceName = service
+	Tracer = otel.Tracer(service)
+
 	if configs.GetConfigVar("OTEL_EXPORTER_OTLP_ENDPOINT") == "" {
 		return
 	}
@@ -45,9 +48,6 @@ func InitTracer(service string) {
 	)
 
 	otel.SetTracerProvider(tp)
-
-	ServiceName = service
-	Tracer = otel.Tracer(service)
 
 	otel.SetTextMapPropagator(propagation.NewCompositeTextMapPropagator(propagation.TraceContext{}, propagation.Baggage{}))
 

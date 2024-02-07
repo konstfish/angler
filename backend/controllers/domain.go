@@ -35,6 +35,11 @@ func PostDomain(c *gin.Context) {
 	// adjust domain fields
 	domain.Created = float64(time.Now().UnixMilli())
 	domain.ID = primitive.NewObjectID()
+	// enabled for a month
+	domain.Settings = models.DomainSettings{
+		EnabledUntil: float64(time.Now().AddDate(0, 1, 0).UnixMilli()),
+		Enabled:      true,
+	}
 
 	// insert domain into database
 	result, err := domainCollection.InsertOne(ctx, domain)

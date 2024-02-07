@@ -6,6 +6,7 @@ import (
 	"net/url"
 
 	"github.com/gin-gonic/gin"
+	"github.com/konstfish/angler/shared/monitoring"
 )
 
 func Cors() gin.HandlerFunc {
@@ -24,24 +25,37 @@ func Cors() gin.HandlerFunc {
 
 func DomainReferrer() gin.HandlerFunc {
 	return func(c *gin.Context) {
+		ctx := c.Request.Context()
+		ctx, span := monitoring.Tracer.Start(ctx, "DomainReferrerMiddleware")
+
 		referrerHeader := c.Request.Header.Get("Referer")
 		target := c.Param("domain")
 
 		referrer, err := url.Parse(referrerHeader)
 		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid referrer URL"})
-			c.AbortWithStatus(403)
+			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "Invalid referrer URL"})
 			return
 		}
 
 		log.Println(referrer.Host, target)
 
 		if referrer.Host != target {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Referrer does not match domain"})
-			c.AbortWithStatus(403)
+			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "Referrer does not match domain"})
 			return
 		}
 
+		// check if the referrer is in the database
+		valid, err := ValidateDomain(ctx, target)
+		if err != nil {
+			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "Failed to validate domain"})
+			return
+		}
+		if !valid {
+			c.AbortWithStatusJSON(http.StatusNotFound, gin.H{"error": "Domain not found"})
+			return
+		}
+
+		span.End()
 		c.Next()
 	}
 }

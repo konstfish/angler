@@ -11,7 +11,6 @@ import (
 	"github.com/konstfish/angler/shared/monitoring"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/propagation"
-	"go.opentelemetry.io/otel/trace"
 )
 
 func Cors() gin.HandlerFunc {
@@ -31,7 +30,8 @@ func Cors() gin.HandlerFunc {
 func ValidateJWT() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// create new span for this middleware
-		ctx, span := monitoring.Tracer.Start(c.Request.Context(), "ValidateJWT", trace.WithSpanKind(trace.SpanKindClient))
+		ctx := c.Request.Context()
+		ctx, span := monitoring.Tracer.Start(ctx, "ValidateJWT")
 
 		authHeader := c.GetHeader("Authorization")
 		if authHeader == "" {
