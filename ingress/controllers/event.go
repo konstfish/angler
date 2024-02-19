@@ -7,15 +7,10 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/konstfish/angler/ingress/models"
-	"github.com/konstfish/angler/shared/db"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
 var eventCollection *mongo.Collection
-
-func init() {
-	eventCollection = db.GetCollection("angler", "events")
-}
 
 func PostEvent(c *gin.Context) {
 	ctx := c.Request.Context()

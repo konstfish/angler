@@ -15,6 +15,8 @@ import (
 	"golang.org/x/time/rate"
 )
 
+var Redis *RedisClient
+
 type RedisClient struct {
 	Client *redis.Client
 	Ctx    context.Context
@@ -41,6 +43,10 @@ func (item *RedisQueueItem) Deserialize(itemJSON string) error {
 	}
 
 	return nil
+}
+
+func InitRedis() {
+	Redis = ConnectRedis()
 }
 
 func ConnectRedis() *RedisClient {

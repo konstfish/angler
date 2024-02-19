@@ -33,4 +33,4 @@ jobs:
       - name: Build
         if: ${{ steps.check-changes.outputs.changed == 'true' }}
         run: |
-          docker build -t angler_${{ matrix.component }} -f helper/docker/Dockerfile.gowork --build-arg COMPONENT=${{ matrix.component }} .
+          docker-compose --file docker-compose.build.yml build ${{ matrix.component }}

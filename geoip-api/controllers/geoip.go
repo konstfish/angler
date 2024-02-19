@@ -19,7 +19,7 @@ import (
 
 var geoIpCollection *mongo.Collection
 
-func init() {
+func InitCollections() {
 	geoIpCollection = db.GetCollection("angler", "geoip")
 }
 

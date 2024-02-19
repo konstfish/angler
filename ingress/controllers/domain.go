@@ -15,9 +15,10 @@ import (
 var domainCollection *mongo.Collection
 var domainTTL time.Duration = time.Hour * 6
 
-func init() {
+func InitCollections() {
 	domainCollection = db.GetCollection("angler", "domains")
-	redisClient = db.ConnectRedis()
+	eventCollection = db.GetCollection("angler", "events")
+	sessionCollection = db.GetCollection("angler", "sessions")
 }
 
 func ValidateDomain(ctx context.Context, domainName string) (bool, error) {
@@ -36,7 +37,7 @@ func ValidateDomain(ctx context.Context, domainName string) (bool, error) {
 }
 
 func getCacheDomain(ctx context.Context, domainName string) (models.Domain, error) {
-	domainJSON, err := redisClient.Client.Get(ctx, fmt.Sprintf("dm-%s", domainName)).Result()
+	domainJSON, err := db.Redis.Client.Get(ctx, fmt.Sprintf("dm-%s", domainName)).Result()
 	if err != nil {
 		log.Println("cache miss")
 		domain, err := getDomain(ctx, domainName)
@@ -44,7 +45,7 @@ func getCacheDomain(ctx context.Context, domainName string) (models.Domain, erro
 		return domain, err
 	}
 
-	_, err = redisClient.Client.Expire(ctx, fmt.Sprintf("dm-%s", domainName), domainTTL).Result()
+	_, err = db.Redis.Client.Expire(ctx, fmt.Sprintf("dm-%s", domainName), domainTTL).Result()
 
 	var domain models.Domain
 	domain.Deserialize(domainJSON)
@@ -68,5 +69,5 @@ func getDomain(ctx context.Context, domainName string) (models.Domain, error) {
 }
 
 func writeCacheDomain(ctx context.Context, domain models.Domain) {
-	redisClient.Client.Set(ctx, fmt.Sprintf("dm-%s", domain.Name), domain.Serialize(), domainTTL)
+	db.Redis.Client.Set(ctx, fmt.Sprintf("dm-%s", domain.Name), domain.Serialize(), domainTTL)
 }

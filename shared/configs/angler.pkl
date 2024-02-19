@@ -1,0 +1,4 @@
+class AnglerGenericConfig {
+  name: String
+  port: Int
+}

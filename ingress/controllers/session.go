@@ -27,14 +27,8 @@ type Session struct {
 */
 
 var sessionCollection *mongo.Collection
-var redisClient *db.RedisClient
 
 var sessionTTL time.Duration = time.Second * 60 * 3
-
-func init() {
-	sessionCollection = db.GetCollection("angler", "sessions")
-	redisClient = db.ConnectRedis()
-}
 
 func PostSession(c *gin.Context) {
 	var session models.Session
@@ -56,7 +50,7 @@ func PostSession(c *gin.Context) {
 	go writeCacheSession(ctx, session)
 
 	// send ip to geoip queue
-	go redisClient.PushToQueue(ctx, "geoip", session.IP)
+	go db.Redis.PushToQueue(ctx, "geoip", session.IP)
 
 	result, err := writeSession(ctx, session)
 	fmt.Println(err)
@@ -105,11 +99,11 @@ func existsSession(ctx context.Context, sessionId string) bool {
 }
 
 func writeCacheSession(ctx context.Context, session models.Session) {
-	redisClient.Client.Set(ctx, session.ID.Hex(), session.Serialize(), sessionTTL)
+	db.Redis.Client.Set(ctx, session.ID.Hex(), session.Serialize(), sessionTTL)
 }
 
 func getCacheSession(ctx context.Context, sessionId string) (models.Session, error) {
-	sessionJSON, err := redisClient.Client.Get(ctx, sessionId).Result()
+	sessionJSON, err := db.Redis.Client.Get(ctx, sessionId).Result()
 	if err != nil {
 		log.Println("cache miss")
 		session, err := getSession(ctx, sessionId)
@@ -117,7 +111,7 @@ func getCacheSession(ctx context.Context, sessionId string) (models.Session, err
 		return session, err
 	}
 
-	_, err = redisClient.Client.Expire(ctx, sessionId, sessionTTL).Result()
+	_, err = db.Redis.Client.Expire(ctx, sessionId, sessionTTL).Result()
 
 	var session models.Session
 	json.Unmarshal([]byte(sessionJSON), &session)

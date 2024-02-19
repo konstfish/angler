@@ -8,14 +8,12 @@ import (
 	"github.com/spf13/viper"
 )
 
-func init() {
-	LoadConfig([]string{
-		"MONGODB_URI",
-		"REDIS_URI",
-	})
+var genericConfig = []string{
+	"MONGODB_URI",
+	"REDIS_URI",
 }
 
-func LoadConfig(expectedVars []string) {
+func LoadConfig(expectedVars ...string) {
 	godotenv.Load()
 
 	viper.SetConfigName("config")
@@ -28,6 +26,8 @@ func LoadConfig(expectedVars []string) {
 	if err := viper.ReadInConfig(); err != nil {
 		log.Printf("Error reading config file, %s", err)
 	}
+
+	expectedVars = append(expectedVars, genericConfig...)
 
 	for _, v := range expectedVars {
 		log.Println(v, viper.GetString(v))

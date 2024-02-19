@@ -10,11 +10,13 @@ import (
 var Router *gin.Engine
 
 func CreateUrlMappings() {
+	// middleware
 	Router = gin.Default()
 	Router.Use(otelgin.Middleware(monitoring.ServiceName, otelgin.WithFilter(monitoring.FilterTraces)))
 
 	Router.Use(controllers.Cors())
 
+	// routes
 	v1 := Router.Group("/api/auth/v1")
 	{
 		v1.POST("/register", controllers.PostRegister)

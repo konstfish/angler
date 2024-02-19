@@ -17,7 +17,7 @@ import (
 var domainCollection *mongo.Collection
 var domainBindCollection *mongo.Collection
 
-func init() {
+func InitCollections() {
 	domainCollection = db.GetCollection("angler", "domains")
 	domainBindCollection = db.GetCollection("angler", "domainBind")
 }

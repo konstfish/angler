@@ -12,18 +12,9 @@ import (
 	"github.com/konstfish/angler/shared/configs"
 	"github.com/konstfish/angler/shared/db"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo"
 )
 
-var userCollection *mongo.Collection
-var redisClient *db.RedisClient
-
 var userTTL time.Duration = time.Hour * 24 * 2
-
-func init() {
-	userCollection = db.GetCollection("angler", "users")
-	redisClient = db.ConnectRedis()
-}
 
 func PostRegister(c *gin.Context) {
 	ctx := c.Request.Context()
@@ -35,7 +26,7 @@ func PostRegister(c *gin.Context) {
 		return
 	}
 
-	// todo i have no clue what bycrypt is/does exactly so reseach it sometime in the future
+	// todo i have no clue what bycrypt does exactly so reseach it sometime in the future
 	user.HashPassword()
 	user.ID = primitive.NewObjectID()
 
@@ -114,11 +105,11 @@ func createJwt(ctx context.Context, user models.User) (string, error) {
 }
 
 func cacheJwt(ctx context.Context, userId string, token string) {
-	redisClient.Client.Set(ctx, fmt.Sprintf("token-%s", userId), token, userTTL)
+	db.Redis.Client.Set(ctx, fmt.Sprintf("token-%s", userId), token, userTTL)
 }
 
 func existsJwt(ctx context.Context, userId string, token string) bool {
-	val, err := redisClient.Client.Get(ctx, fmt.Sprintf("token-%s", userId)).Result()
+	val, err := db.Redis.Client.Get(ctx, fmt.Sprintf("token-%s", userId)).Result()
 	if err != nil {
 		return false
 	}

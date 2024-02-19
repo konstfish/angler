@@ -11,7 +11,7 @@ import (
 
 var client *mongo.Client
 
-func init() {
+func InitMongo() {
 	client = ConnectMongo()
 }
 
